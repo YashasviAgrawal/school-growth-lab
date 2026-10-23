@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------
+   School Growth Lab — design tokens
+   Warm paper ground, ink type, Inter Tight display with Instrument
+   Serif italics. Every product mock reads the four --school-* vars,
+   so one pick re-dresses the whole page.
+---------------------------------------------------------------- */
+
+@property --school-primary { syntax: "<color>"; inherits: true; initial-value: #1d3a8a; }
+@property --school-deep    { syntax: "<color>"; inherits: true; initial-value: #0d1d4d; }
+@property --school-accent  { syntax: "<color>"; inherits: true; initial-value: #d4a843; }
+@property --school-soft    { syntax: "<color>"; inherits: true; initial-value: #eef1fa; }
+
+@theme {
+  --color-paper: #faf9f6;
+  --color-paper-2: #f3f1ec;
+  --color-ink: #0b0b0f;
+  --color-body: #3a3a44;
+  --color-muted: #6b6b76;
+  --color-faint: #a3a3ad;
+  --color-line: rgb(11 11 15 / 0.08);
+  --color-spark: #ff8a3d;
+  --color-mint: #4fd18b;
+  --color-sun: #f5c542;
+  --color-lilac: #b9a7ff;
+  --color-sky: #8fb8ff;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-inter-tight), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument), ui-serif, Georgia, "Times New Roman", serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-ping-soft: ping-soft 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+
+  --shadow-card: 0 1px 2px rgb(11 11 15 / 0.04), 0 8px 24px -12px rgb(11 11 15 / 0.12);
+  --shadow-lift: 0 1px 2px rgb(11 11 15 / 0.05), 0 24px 48px -24px rgb(11 11 15 / 0.25);
+  --shadow-device: 0 2px 4px rgb(11 11 15 / 0.08), 0 40px 80px -30px rgb(11 11 15 / 0.45);
+}
+
+@theme inline {
+  --color-school: var(--school-primary);
+  --color-school-deep: var(--school-deep);
+  --color-school-accent: var(--school-accent);
+  --color-school-soft: var(--school-soft);
+}
+
+@layer base {
+  html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--color-paper);
+    color: var(--color-body);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+  }
+  h1, h2, h3, h4 { color: var(--color-ink); text-wrap: balance; }
+  ::selection { background: color-mix(in oklab, var(--color-spark) 30%, white); color: var(--color-ink); }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; border-radius: 10px; }
+}
+
+/* ---------- motion primitives ---------- */
+
+@keyframes marquee { to { transform: translateX(-50%); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes ping-soft { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, currentColor 55%, transparent); } 80%, 100% { box-shadow: 0 0 0 8px transparent; } }
+@keyframes word-in { from { opacity: 0; transform: translateY(0.45em); filter: blur(8px); } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.6) rotate(var(--r, 0deg)); } }
+@keyframes draw { from { stroke-dashoffset: var(--len, 120); } }
+@keyframes drift-a { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(4%, 6%, 0) scale(1.08); } }
+@keyframes drift-b { 0%, 100% { transform: translate3d(0, 0, 0) scale(1.05); } 50% { transform: translate3d(-5%, 3%, 0) scale(0.95); } }
+@keyframes progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes shimmer { from { transform: translateX(-120%); } to { transform: translateX(220%); } }
+@keyframes bar-grow { from { transform: scaleY(0); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-16px) scale(0.96); } }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes burst {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.4); }
+  70% { opacity: 1; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 40px)) rotate(var(--rot)) scale(1); }
+}
+
+/* Headline words rise in on load (Wajo-style), staggered by --i */
+.word-in { display: inline-block; animation: word-in 0.9s var(--ease-out-expo) both; animation-delay: calc(var(--i, 0) * 60ms + 120ms); }
+
+/* Elements that pop in with a spring, then idle-float */
+.pop-in { animation: pop-in 0.9s var(--ease-spring) both; animation-delay: calc(var(--i, 0) * 90ms + 500ms); }
+
+/* Scroll reveals: only hidden once JS has booted (html.js), so the page
+   is complete without JavaScript and for thumbnail/crawler captures. */
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  filter: blur(6px);
+  transition: opacity 0.9s var(--ease-out-expo), transform 0.9s var(--ease-out-expo), filter 0.9s var(--ease-out-expo);
+  transition-delay: var(--d, 0ms);
+}
+html.js [data-reveal][data-shown] { opacity: 1; transform: none; filter: none; }
+html.js [data-reveal="scale"] { transform: scale(0.94); }
+html.js [data-reveal="scale"][data-shown] { transform: none; }
+
+/* Aurora blobs used behind the hero and CTA */
+.aurora { position: absolute; inset: -20%; pointer-events: none; filter: blur(70px); opacity: 0.75; }
+.aurora > i { position: absolute; border-radius: 9999px; display: block; }
+.aurora > i:nth-child(1) { left: 2%; top: 0; width: 42%; height: 55%; background: #c7cffd; animation: drift-a 18s ease-in-out infinite; }
+.aurora > i:nth-child(2) { right: 0; top: 4%; width: 38%; height: 50%; background: #ffd9bd; animation: drift-b 22s ease-in-out infinite; }
+.aurora > i:nth-child(3) { left: 38%; top: 30%; width: 30%; height: 40%; background: #ead9ff; animation: drift-a 26s ease-in-out infinite reverse; }
+.aurora > i:nth-child(4) { left: 20%; bottom: 0; width: 36%; height: 36%; background: #d3f2e2; animation: drift-b 24s ease-in-out infinite; }
+
+/* Hairline grain on the paper so large flat areas don't look plastic */
+.grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.35; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Fading edges for marquees */
+.mask-x { mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
+
+/* Doodle strokes (line illustrations) */
+.doodle { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Scroll-lit words */
+.lit-word { color: var(--color-faint); transition: color 0.35s ease; }
+.lit-word[data-lit] { color: var(--color-ink); }
+.lit-dark .lit-word { color: rgb(255 255 255 / 0.28); }
+.lit-dark .lit-word[data-lit] { color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  html { scroll-behavior: auto; }
+  html.js [data-reveal] { opacity: 1; transform: none; filter: none; }
+  [data-parallax] { transform: none !important; }
+}
+
+/* The Living Crest logo. Intro animations sit on the *-in wrappers and hover ones on
+   the inner shapes, so leaving hover never replays the intro. */
+.crest-line { stroke-dasharray: 1; }
+.crest-ball, .crest-ball-in, .crest-twinkle, .crest-twinkle-in { transform-box: fill-box; transform-origin: center; }
+.crest-ball { transition: transform 0.6s var(--ease-spring); }
+.group:hover .crest-ball, .crest:hover .crest-ball { transform: translate(1.6px, -1.6px) scale(1.12); }
+.group:hover .crest-line, .crest:hover .crest-line { animation: crest-draw 0.9s var(--ease-out-expo); }
+.group:hover .crest-twinkle, .crest:hover .crest-twinkle { animation: twinkle 0.9s var(--ease-out-expo); }
+.crest-intro .crest-line-in { animation: crest-draw 1.1s var(--ease-out-expo) 0.2s both; }
+.crest-intro .crest-ball-in { animation: crest-pop 0.7s var(--ease-spring) 0.85s both; }
+.crest-intro .crest-twinkle-in { animation: twinkle 1s var(--ease-out-expo) 1.15s both; }
+@keyframes crest-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes crest-pop { from { transform: scale(0); } }
+@keyframes twinkle {
+  0% { opacity: 0; transform: scale(0.4) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.5) rotate(90deg); }
+  100% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+/* ERP laptop tour. ErpTour sets --open (lid), --boot (boot bar), --shift (intro → feature
+   layout) and --sp (active step progress); large screens pin and drive them from scroll. */
+@keyframes pane-in { from { opacity: 0; transform: translateY(10px); } }
+@keyframes mark { from { background-color: #e9e9ec; color: #a3a3ad; } }
+@keyframes progress-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+.tour { --open: 0; --boot: 0; --shift: 0; --sp: 0; }
+.tour-lid { transform-origin: 50% 100%; transform: rotateX(calc((1 - var(--open)) * -86deg)); }
+.tour-boot { transform-origin: left; transform: scaleX(var(--boot)); }
+
+/* Progress bar on the active step of a pinned story; --sp is set from scroll on large screens. */
+.step-bar { transform-origin: top; }
+
+/* Grey skeleton placeholder with a soft shimmer (the website "wireframe" stage). */
+.sk { position: relative; overflow: hidden; background: #ebe9e4; }
+.sk::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-120%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.6), transparent);
+  animation: shimmer 1.8s ease-in-out infinite;
+}
+
+@media (min-width: 1024px) {
+  .tour-head { position: absolute; inset-inline: 0; top: 6%; opacity: calc(1 - var(--shift) * 1.6); transform: translateY(calc(var(--shift) * -40px)); }
+  .tour-laptop {
+    position: absolute; bottom: 4%; left: calc(50% - var(--shift) * 17%);
+    width: min(58%, 780px, calc((min(100svh - 100px, 800px) - 250px) * 1.47));
+    transform-origin: 50% 100%;
+    transform: translate(-50%, calc(var(--shift) * -95px)) scale(calc(0.94 + var(--open) * 0.06 + var(--shift) * 0.04));
+  }
+  .tour-list { position: absolute; right: 4%; top: 50%; width: min(34%, 360px); opacity: var(--shift); transform: translate(calc((1 - var(--shift)) * 48px), -50%); }
+  .tour-hint { opacity: calc(1 - var(--open) * 3); }
+  .step-bar { transform: scaleY(var(--sp, 0)); }
+}
+
+@media (max-width: 1023.98px) {
+  .tour-lid { transition: transform 1.4s var(--ease-out-expo); }
+  .tour-boot { transition: transform 1.1s ease-in-out; }
+}
+
+/* Without JS, scroll-lit words show in full ink */
+html:not(.js) .lit-word { color: var(--color-ink); }
+
+/* The school's own app "installs" on the home screen when the section is seen */
+.sgl-installed .sgl-app-icon { animation: pop-in 0.9s var(--ease-spring) both 0.35s; --r: -8deg; }
